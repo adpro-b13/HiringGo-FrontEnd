@@ -1,10 +1,11 @@
 # hiringgo-fe/authentication/urls.py
 from django.urls import path
-from . import views # Kita akan membuat views.py nanti
+from . import views
 
-app_name = 'authentication' # Namespace untuk URL (sangat direkomendasikan!)
+app_name = 'authentication'
 
 urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('register/', views.register_view, name='register'),
+    path('logout/', views.logout_view, name='logout'), # Tambahkan URL logout
 ]
