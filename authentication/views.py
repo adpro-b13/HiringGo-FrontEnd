@@ -49,7 +49,7 @@ def register_view(request):
         form = RegistrationForm()
     
     context = {'form': form}
-    return render(request, 'authentication/register.html', context)
+    return render(request, 'register.html', context)
 
 
 def login_view(request):
@@ -102,7 +102,7 @@ def login_view(request):
         form = LoginForm()
     
     context = {'form': form}
-    return render(request, 'authentication/login.html', context)
+    return render(request, 'login.html', context)
 
 def logout_view(request):
     # Hapus data session terkait autentikasi
