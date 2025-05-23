@@ -11,7 +11,7 @@
         Sudah Mendaftar: {{ lowongan.jumlahAsistenMendaftar }} <br>
         Sudah Diterima: {{ lowongan.jumlahAsistenDiterima }} <br>
 
-        {% if role == "MAHASISWA" %}
+        {% if role == "ROLE_MAHASISWA" %}
           <form action="{% url 'daftar_lowongan' lowongan.id %}" method="post">
             {% csrf_token %}
             <input type="hidden" name="token" value="{{ token }}">

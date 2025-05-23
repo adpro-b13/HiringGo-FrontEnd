@@ -25,6 +25,30 @@ def delete_lowongan(request, id):
     except Exception:
         return HttpResponse("Gagal menghubungi server", status=500)
 
+def status_lamaran(request):
+    token = request.session.get("auth_token")
+    if not token:
+        return redirect("authentication:login")
+
+    try:
+        response = httpx.get(
+            f"{BACKEND_URL}/api/lowongan/status",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        response.raise_for_status()
+        lamaran_list = response.json()
+        print("🟢 Lamaran List JSON:", lamaran_list)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return HttpResponse(f"🔥 Internal Error: {e}", status=500)
+
+    return render(request, "recruitment/status_lamaran.html", {
+        "lamaran_list": lamaran_list
+    })
+
+
+
 
 def lowongan_list(request):
     token = request.session.get("auth_token")
@@ -33,7 +57,10 @@ def lowongan_list(request):
 
     try:
         claims = jwt.decode(token, options={"verify_signature": False})
-        role = claims.get("role")
+        role = claims.get("roles")
+        print(token)
+        print(role)
+        print("🔥 lowongan_list view was called")
     except Exception:
         return redirect("authentication:login")
 
@@ -76,31 +103,75 @@ def daftar_lowongan(request, id):
     except Exception:
         return HttpResponse("Gagal menghubungi server", status=500)
 
+@csrf_exempt
 def my_lowongan(request):
     token = request.session.get("auth_token")
     if not token:
         return redirect("authentication:login")
 
     role = request.session.get("user_role")
-    print("🟡 DEBUG: user_role from session =", role)  # 👈 this line prints the role
-
-    if role != "DOSEN":
-        return HttpResponse("Forbidden", status=403)
+    print("🟡 DEBUG: user_role from session =", role)
 
     try:
         response = httpx.get(
             f"{BACKEND_URL}/api/lowongan/my",
             headers={"Authorization": f"Bearer {token}"}
         )
+        print("🟢 Status code:", response.status_code)
+        print("🟢 Response text:", response.text)
         response.raise_for_status()
         lowongan_list = response.json()
-    except httpx.HTTPError as e:
-        return HttpResponse(f"Gagal fetch data: {e}", status=500)
+        print("✅ Parsed JSON:", lowongan_list)
+
+    except httpx.HTTPStatusError as e:
+        print("❌ HTTP error:", e)
+        print("❌ Response body:", e.response.text)
+        return HttpResponse(f"Gagal fetch data: {e}", status=e.response.status_code)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return HttpResponse(f"🔥 Internal Django Error: {str(e)}", status=500)
 
     return render(request, "recruitment/my_lowongan.html", {
         "lowongan_list": lowongan_list,
         "token": token
     })
+
+@csrf_exempt
+def terima_pelamar(request, pendaftaran_id):
+    token = request.session.get("auth_token")
+    if not token:
+        return redirect("authentication:login")
+
+    try:
+        response = httpx.put(
+            f"{BACKEND_URL}/api/lowongan/pelamar/{pendaftaran_id}/terima",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        if response.status_code == 200:
+            return redirect(request.META.get("HTTP_REFERER", "my_lowongan"))
+        else:
+            return HttpResponse("Gagal menerima pelamar", status=response.status_code)
+    except Exception:
+        return HttpResponse("Gagal menghubungi server", status=500)
+
+@csrf_exempt
+def tolak_pelamar(request, pendaftaran_id):
+    token = request.session.get("auth_token")
+    if not token:
+        return redirect("authentication:login")
+
+    try:
+        response = httpx.put(
+            f"{BACKEND_URL}/api/lowongan/pelamar/{pendaftaran_id}/tolak",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        if response.status_code == 200:
+            return redirect(request.META.get("HTTP_REFERER", "my_lowongan"))
+        else:
+            return HttpResponse("Gagal menolak pelamar", status=response.status_code)
+    except Exception:
+        return HttpResponse("Gagal menghubungi server", status=500)
 
 
 @csrf_exempt
