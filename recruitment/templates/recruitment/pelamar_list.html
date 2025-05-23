@@ -1,0 +1,15 @@
+<h1>Daftar Pelamar</h1>
+
+<ul>
+  {% for pelamar in pelamar_list %}
+    <li>
+      Mahasiswa ID: {{ pelamar.mahasiswaId }} |
+      IPK: {{ pelamar.ipk }} |
+      SKS: {{ pelamar.jumlahSks }}
+    </li>
+  {% empty %}
+    <li>Tidak ada pelamar.</li>
+  {% endfor %}
+</ul>
+
+<a href="{% url 'my_lowongan' %}">⬅️ Kembali ke Lowongan Saya</a>

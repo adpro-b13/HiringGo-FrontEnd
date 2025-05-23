@@ -1,0 +1,29 @@
+<h1>Daftar Lowongan</h1>
+
+{% if lowongan_list %}
+  <ul>
+    {% for lowongan in lowongan_list %}
+      <li>
+        <strong>{{ lowongan.mataKuliah }}</strong> <br>
+        Tahun Ajaran: {{ lowongan.tahunAjaran }} <br>
+        Semester: {{ lowongan.semester }} <br>
+        Dibutuhkan: {{ lowongan.jumlahAsistenDibutuhkan }} <br>
+        Sudah Mendaftar: {{ lowongan.jumlahAsistenMendaftar }} <br>
+        Sudah Diterima: {{ lowongan.jumlahAsistenDiterima }} <br>
+
+        {% if role == "MAHASISWA" %}
+          <form action="{% url 'daftar_lowongan' lowongan.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="token" value="{{ token }}">
+            <input type="number" step="0.01" name="ipk" placeholder="IPK" required>
+            <input type="number" name="jumlahSks" placeholder="Jumlah SKS" required>
+            <button type="submit">Daftar</button>
+          </form>
+        {% endif %}
+      </li>
+      <hr>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Tidak ada lowongan tersedia.</p>
+{% endif %}
