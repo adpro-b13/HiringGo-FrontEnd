@@ -1,0 +1,35 @@
+<h1>Lowongan Saya</h1>
+
+<a href="{% url 'create_lowongan' %}">
+    <button>Buat Lowongan Baru</button>
+</a>
+
+<hr>
+
+<ul>
+  {% for lowongan in lowongan_list %}
+    <li>
+      <strong>{{ lowongan.mataKuliah }}</strong> – Semester {{ lowongan.semester }} {{ lowongan.tahunAjaran }}
+      <br>
+      Dibutuhkan: {{ lowongan.jumlahAsistenDibutuhkan }} |
+      Mendaftar: {{ lowongan.jumlahAsistenMendaftar }}
+      <br>
+
+      <a href="{% url 'edit_lowongan' lowongan.id %}">
+        <button>Edit</button>
+      </a>
+      <a href="{% url 'lihat_pelamar' lowongan.id %}">
+        <button>Lihat Pelamar</button>
+      </a>
+
+
+
+      <form action="{% url 'delete_lowongan' lowongan.id %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="token" value="{{ token }}">
+        <button type="submit" onclick="return confirm('Yakin ingin menghapus lowongan ini?')">Hapus</button>
+      </form>
+    </li>
+    <hr>
+  {% endfor %}
+</ul>

@@ -1,0 +1,9 @@
+<h1>Buat Lowongan Baru</h1>
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="mataKuliah" placeholder="Mata Kuliah" required><br>
+    <input type="text" name="semester" placeholder="Semester" required><br>
+    <input type="text" name="tahunAjaran" placeholder="Tahun Ajaran" required><br>
+    <input type="number" name="jumlahAsistenDibutuhkan" placeholder="Jumlah Asisten Dibutuhkan" required><br>
+    <button type="submit">Buat</button>
+</form>
