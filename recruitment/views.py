@@ -17,6 +17,7 @@ def delete_lowongan(request, id):
             f"{BACKEND_URL}/api/lowongan/delete/{id}",
             headers={"Authorization": f"Bearer {token}"}
         )
+        
         if response.status_code == 200:
             return redirect("my_lowongan")
         else:
@@ -25,7 +26,7 @@ def delete_lowongan(request, id):
         return HttpResponse("Gagal menghubungi server", status=500)
 
 
-async def lowongan_list(request):
+def lowongan_list(request):
     token = request.session.get("auth_token")
     if not token:
         return redirect("authentication:login")
@@ -36,16 +37,15 @@ async def lowongan_list(request):
     except Exception:
         return redirect("authentication:login")
 
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(
-                f"{BACKEND_URL}/api/lowongan/",
-                headers={"Authorization": f"Bearer {token}"}
-            )
-            response.raise_for_status()
-            lowongan_list = response.json()
-        except httpx.HTTPError:
-            return HttpResponse("Failed to fetch lowongan", status=500)
+    try:
+        response = httpx.get(
+            f"{BACKEND_URL}/api/lowongan/list",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        response.raise_for_status()
+        lowongan_list = response.json()
+    except httpx.HTTPError:
+        return HttpResponse("Failed to fetch lowongan", status=500)
 
     return render(request, "recruitment/lowongan_list.html", {
         "lowongan_list": lowongan_list,
