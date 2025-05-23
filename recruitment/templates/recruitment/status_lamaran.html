@@ -1,0 +1,16 @@
+<h2>Status Lamaran Saya</h2>
+{% if lamaran_list %}
+  <ul>
+    {% for lamaran in lamaran_list %}
+      <li>
+        <strong>{{ lamaran.lowongan.mataKuliah }}</strong><br>
+        Tahun Ajaran: {{ lamaran.lowongan.tahunAjaran }}<br>
+        Semester: {{ lamaran.lowongan.semester }}<br>
+        Status: <strong>{{ lamaran.status }}</strong>
+      </li>
+      <hr>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Anda belum mendaftar ke lowongan manapun.</p>
+{% endif %}

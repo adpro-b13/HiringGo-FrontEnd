@@ -1,15 +1,22 @@
-<h1>Daftar Pelamar</h1>
-
-<ul>
-  {% for pelamar in pelamar_list %}
-    <li>
-      Mahasiswa ID: {{ pelamar.mahasiswaId }} |
-      IPK: {{ pelamar.ipk }} |
-      SKS: {{ pelamar.jumlahSks }}
-    </li>
-  {% empty %}
-    <li>Tidak ada pelamar.</li>
-  {% endfor %}
-</ul>
-
-<a href="{% url 'my_lowongan' %}">⬅️ Kembali ke Lowongan Saya</a>
+{% for pelamar in pelamar_list %}
+<tr>
+  <td>{{ pelamar.mahasiswaId }}</td>
+  <td>{{ pelamar.ipk }}</td>
+  <td>{{ pelamar.jumlahSks }}</td>
+  <td>{{ pelamar.status }}</td>
+  <td>
+    {% if pelamar.status == "DITUNDA" %}
+      <form action="{% url 'terima_pelamar' pelamar.id %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Terima</button>
+      </form>
+      <form action="{% url 'tolak_pelamar' pelamar.id %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Tolak</button>
+      </form>
+    {% else %}
+      {{ pelamar.status }}
+    {% endif %}
+  </td>
+</tr>
+{% endfor %}
