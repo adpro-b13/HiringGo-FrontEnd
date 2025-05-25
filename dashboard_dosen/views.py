@@ -2,7 +2,7 @@ import httpx
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 
-BACKEND_URL = "http://localhost:8081"
+BACKEND_URL = "http://hiringultramyb13.duckdns.org:8080"
 
 def dashboard_dosen_view(request):
     token = request.session.get("auth_token")
