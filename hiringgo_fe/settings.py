@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'authentication',
     'recruitment',
+    'dashboard_dosen',
 ]
 
 MIDDLEWARE = [
