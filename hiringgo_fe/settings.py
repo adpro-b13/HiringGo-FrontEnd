@@ -27,6 +27,10 @@ SECRET_KEY = 'rahasia'
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://hiringgo-frontend-production.up.railway.app"
+]
+
 
 # Application definition
 
