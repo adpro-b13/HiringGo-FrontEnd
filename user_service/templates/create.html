@@ -1,0 +1,38 @@
+<!-- templates/user_service/create.html -->
+{% extends "base.html" %}
+{% block title %}Buat User Baru{% endblock %}
+{% block content %}
+<h1>Buat User Baru</h1>
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label for="namaLengkap" class="form-label">Nama Lengkap</label>
+    <input type="text" class="form-control" id="namaLengkap" name="namaLengkap" required>
+  </div>
+  <div class="mb-3">
+    <label for="email" class="form-label">Email</label>
+    <input type="email" class="form-control" id="email" name="email" required>
+  </div>
+  <div class="mb-3">
+    <label for="password" class="form-label">Password</label>
+    <input type="password" class="form-control" id="password" name="password" required>
+  </div>
+  <div class="mb-3">
+    <label for="role" class="form-label">Role</label>
+    <select class="form-select" id="role" name="role" required>
+      <option value="MAHASISWA">Mahasiswa</option>
+      <option value="DOSEN">Dosen</option>
+      <option value="ADMIN">Admin</option>
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="nim" class="form-label">NIM (jika Mahasiswa)</label>
+    <input type="text" class="form-control" id="nim" name="nim">
+  </div>
+  <div class="mb-3">
+    <label for="nip" class="form-label">NIP (jika Dosen)</label>
+    <input type="text" class="form-control" id="nip" name="nip">
+  </div>
+  <button type="submit" class="btn btn-primary">Buat</button>
+</form>
+{% endblock %}

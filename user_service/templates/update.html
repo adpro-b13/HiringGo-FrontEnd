@@ -1,0 +1,19 @@
+<!-- templates/user_service/update.html -->
+{% extends "base.html" %}
+{% block title %}Update Role User{% endblock %}
+{% block content %}
+<h1>Update Role: {{ user.namaLengkap }}</h1>
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label for="role" class="form-label">Role</label>
+    <select class="form-select" id="role" name="role" required>
+      <option value="MAHASISWA" {% if user.role == 'MAHASISWA' %}selected{% endif %}>Mahasiswa</option>
+      <option value="DOSEN" {% if user.role == 'DOSEN' %}selected{% endif %}>Dosen</option>
+      <option value="ADMIN" {% if user.role == 'ADMIN' %}selected{% endif %}>Admin</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary">Update</button>
+</form>
+{% endblock %}
+
