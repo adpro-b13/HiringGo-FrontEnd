@@ -4,6 +4,7 @@ from django.contrib import messages # Untuk menampilkan pesan feedback
 import requests # Untuk melakukan HTTP request
 import json
 from .forms import RegistrationForm, LoginForm
+from django.urls import reverse
 
 # URL Backend Spring Boot
 BACKEND_URL = "http://localhost:8080/api/auth"
@@ -79,7 +80,7 @@ def login_view(request):
                 if auth_data.get('role') == 'ADMIN':
                     return redirect('nama_app_dashboard_admin:dashboard') # Ganti dengan URL dashboard admin
                 elif auth_data.get('role') == 'DOSEN':
-                    return redirect('nama_app_dashboard_dosen:dashboard') # Ganti dengan URL dashboard dosen
+                    return redirect(reverse("dashboard_dosen")) # Ganti dengan URL dashboard dosen
                 elif auth_data.get('role') == 'MAHASISWA':
                     return redirect('nama_app_dashboard_mahasiswa:dashboard') # Ganti dengan URL dashboard mahasiswa
                 else:
