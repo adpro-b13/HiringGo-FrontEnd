@@ -1,0 +1,15 @@
+<h1>Dashboard Dosen</h1>
+
+<ul>
+  <li>Jumlah mata kuliah yang diampu:
+    {% if jumlah_mata_kuliah == "Waiting for course management..." %}
+      <em style="color: gray;">{{ jumlah_mata_kuliah }}</em>
+    {% else %}
+      {{ jumlah_mata_kuliah }}
+    {% endif %}
+  </li>
+  <li>Jumlah mahasiswa yang telah diterima: {{ jumlah_mahasiswa_diterima }}</li>
+  <li>Jumlah lowongan yang masih terbuka: {{ jumlah_lowongan_terbuka }}</li>
+</ul>
+
+<a href="{% url 'my_lowongan' %}">🧑‍🏫 Lihat lowongan saya</a>

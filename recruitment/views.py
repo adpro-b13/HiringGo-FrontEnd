@@ -122,6 +122,7 @@ def my_lowongan(request):
         response.raise_for_status()
         lowongan_list = response.json()
         print("✅ Parsed JSON:", lowongan_list)
+        print(token)
 
     except httpx.HTTPStatusError as e:
         print("❌ HTTP error:", e)
