@@ -7,7 +7,7 @@ from .forms import RegistrationForm, LoginForm
 from django.urls import reverse
 
 # URL Backend Spring Boot
-BACKEND_URL = "http://localhost:8080/api/auth"
+BACKEND_URL = "http://54.252.34.157:8080/api/auth"
 
 def register_view(request):
     if request.method == 'POST':
