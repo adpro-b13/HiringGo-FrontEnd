@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-BACKEND_URL = "http://localhost:8081"
+BACKEND_URL = "http://hiringultramyb13.duckdns.org:8080"
 
 def delete_lowongan(request, id):
     if request.method != "POST":
