@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'authentication',
     'recruitment',
     'dashboard_dosen',
+    'user_service', 
 ]
 
 MIDDLEWARE = [
@@ -61,7 +62,7 @@ ROOT_URLCONF = 'hiringgo_fe.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # Path to your templates directory
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

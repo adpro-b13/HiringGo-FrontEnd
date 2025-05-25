@@ -78,7 +78,8 @@ def login_view(request):
                 messages.success(request, "Login berhasil!")
                 # Redirect ke halaman dashboard sesuai role (perlu dibuat nanti)
                 if auth_data.get('role') == 'ADMIN':
-                    return redirect('nama_app_dashboard_admin:dashboard') # Ganti dengan URL dashboard admin
+                    return redirect('user_service:list_users') 
+                    # return redirect('nama_app_dashboard_admin:dashboard') # Ganti dengan URL dashboard admin
                 elif auth_data.get('role') == 'DOSEN':
                     return redirect(reverse("dashboard_dosen")) # Ganti dengan URL dashboard dosen
                 elif auth_data.get('role') == 'MAHASISWA':

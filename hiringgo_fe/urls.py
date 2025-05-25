@@ -22,4 +22,5 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('lowongan/', include('recruitment.urls')),
     path('dashboard/dosen/', include('dashboard_dosen.urls')),
+    path('users/', include('user_service.urls')), 
 ]

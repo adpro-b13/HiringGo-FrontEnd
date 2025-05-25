@@ -3,8 +3,6 @@ from django import forms
 
 ROLE_CHOICES = [
     ('MAHASISWA', 'Mahasiswa'),
-    ('DOSEN', 'Dosen'),
-    # ('ADMIN', 'Admin') # Sesuai backend, admin tidak boleh daftar via endpoint ini
 ]
 
 class RegistrationForm(forms.Form):
