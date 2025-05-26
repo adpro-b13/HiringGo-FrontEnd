@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Log</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input[type="text"], .form-group textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+        .error { color: red; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Update Log ID: {{ log.id }}</h1>
+    <nav>
+        <a href="{% url 'home_page' %}">Home</a> | 
+        <a href="{% url 'logs:log_list' %}">Back to Log List</a>
+    </nav>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST" action="{% url 'logs:log_update_form' log_id=log.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="token" value="{{ token }}">
+        <div class="form-group">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" value="{{ log.title }}" required>
+        </div>
+        <div class="form-group">
+            <label for="content">Content:</label>
+            <textarea id="content" name="content" rows="4" required>{{ log.content }}</textarea>
+        </div>
+        <!-- Add other fields from your log model that can be updated -->
+        <button type="submit">Update Log</button>
+    </form>
+</body>
+</html>
