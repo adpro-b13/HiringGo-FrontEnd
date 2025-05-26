@@ -6,7 +6,7 @@
         <strong>{{ lamaran.lowongan.mataKuliah }}</strong><br>
         Tahun Ajaran: {{ lamaran.lowongan.tahunAjaran }}<br>
         Semester: {{ lamaran.lowongan.semester }}<br>
-        Status: <strong>{{ lamaran.status }}</strong>
+        <a href="{% url 'log:log_list_view' lowongan_id=lamaran.lowongan.id %}">Lihat Detail Log</a> {# OR use pk=lamaran.id if that's your URL conf #}
       </li>
       <hr>
     {% endfor %}

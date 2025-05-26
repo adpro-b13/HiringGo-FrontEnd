@@ -1,36 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirm Delete Log</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .confirm-box { border: 1px solid #ccc; padding: 20px; margin-top: 20px; background-color: #f9f9f9; }
-        .actions button, .actions a { margin-right: 10px; padding: 10px 15px; text-decoration: none; }
-    </style>
-</head>
-<body>
-    <h1>Confirm Deletion</h1>
-    <nav>
-        <a href="{% url 'home_page' %}">Home</a> | 
-        <a href="{% url 'logs:log_list' %}">Back to Log List</a>
-    </nav>
+{% block title %}Confirm Delete Log{% endblock %}
 
-    <div class="confirm-box">
-        <p>Are you sure you want to delete the following log?</p>
-        <p><strong>ID:</strong> {{ log.id }}</p>
-        <p><strong>Title:</strong> {{ log.title }}</p>
-        <p><strong>Content:</strong> {{ log.content|slice:":200" }}{% if log.content|length > 200 %}...{% endif %}</p>
-        
-        <form method="POST" action="{% url 'logs:log_delete_confirm' log_id=log.id %}">
-            {% csrf_token %}
-            <input type="hidden" name="token" value="{{ token }}"> <!-- Token from GET request context -->
-            <div class="actions">
-                <button type="submit" style="background-color: #d9534f; color: white; border: none;">Confirm Delete</button>
-                <a href="{% url 'logs:log_list' %}" style="background-color: #ccc; color: black;">Cancel</a>
-            </div>
-        </form>
+{% block content %}
+<div class="container mt-4">
+    <h2>Confirm Deletion</h2>
+
+    {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    <div class="alert alert-warning" role="alert">
+        <p>Are you sure you want to delete Log ID: <strong>{{ log_id }}</strong>?</p>
+        <p>This action cannot be undone.</p>
     </div>
-</body>
-</html>
+    
+    <form method="POST" action="{% url 'log:log_delete_confirm' vacancy_id=vacancy_id log_id=log_id %}">
+        {% csrf_token %}
+        
+        <input type="hidden" name="vacancyId" value="{{ vacancy_id }}">
+        
+        <input type="hidden" name="token" value="{{ token }}"> 
+        
+        <button type="submit" class="btn btn-danger">Yes, Delete Log</button>
+        
+        {# Link back to the specific log list if vacancy_id is available #}
+        {% if vacancy_id %}
+            <a href="{% url 'log:log_list_view' lowongan_id=vacancy_id %}" class="btn btn-secondary">Cancel</a>
+        {% else %}
+            {# Fallback cancel link if vacancy_id isn't available for some reason #}
+            <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="btn btn-secondary">Cancel</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

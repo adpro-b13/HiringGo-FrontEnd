@@ -42,13 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authentication',
-<<<<<<< HEAD
     'recruitment',
     'dashboard_dosen',
     'user_service', 
-=======
     'log',
->>>>>>> e7a3254 (initialize log fe)
 ]
 
 MIDDLEWARE = [

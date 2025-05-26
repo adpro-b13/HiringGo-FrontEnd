@@ -1,0 +1,57 @@
+{% block title %}Create Log{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Create New Log for Vacancy ID: {{ lowongan_id }}</h2>
+
+    {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    <form method="POST" action="{% url 'log:log_create' lowongan_id=lowongan_id %}">
+        {% csrf_token %} <!-- Standard Django CSRF token -->
+
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ form_data.title|default:'' }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3" required>{{ form_data.description|default:'' }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" id="category" name="category" required>
+                <option value="" {% if not form_data.category %}selected{% endif %} disabled>Select a category</option>
+                <option value="Asistensi/Tutorial" {% if form_data.category == "Asistensi/Tutorial" %}selected{% endif %}>Asistensi/Tutorial</option>
+                <option value="Mengoreksi" {% if form_data.category == "Mengoreksi" %}selected{% endif %}>Mengoreksi</option>
+                <option value="Mengawas" {% if form_data.category == "Mengawas" %}selected{% endif %}>Mengawas</option>
+                <option value="Persiapan Asistensi" {% if form_data.category == "Persiapan Asistensi" %}selected{% endif %}>Persiapan Asistensi</option>
+                <option value="Membuat soal" {% if form_data.category == "Membuat soal" %}selected{% endif %}>Membuat soal</option>
+            </select>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="logDate" class="form-label">Log Date</label>
+                <input type="date" class="form-control" id="logDate" name="logDate" value="{{ form_data.logDate|default:'' }}" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="startTime" class="form-label">Start Time</label>
+                <input type="time" class="form-control" id="startTime" name="startTime" value="{{ form_data.startTime|default:'' }}" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="endTime" class="form-label">End Time</label>
+                <input type="time" class="form-control" id="endTime" name="endTime" value="{{ form_data.endTime|default:'' }}" required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Log</button>
+        <a href="{% url 'log:log_list_view' lowongan_id=lowongan_id %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,3 +1,4 @@
+from datetime import datetime
 from pyexpat.errors import messages
 import httpx
 # import jwt # Import if you need to decode JWT for roles/claims in frontend views
@@ -22,11 +23,10 @@ def get_auth_headers(request):
 # --- Refactored Views ---
 
 @csrf_exempt # If POST is from a non-Django form or AJAX without Django's CSRF
-def log_list_and_create_view(request):
+def log_list_view(request, lowongan_id):
     """
     Corresponds to LogController:
-    - GET /logs (list all logs)
-    - POST /logs (create a new log)
+    - GET /logs/student?vacancyId={lowongan_id} (list all logs for a student and vacancy)
     """
     headers = get_auth_headers(request)
     if not headers:
@@ -34,10 +34,15 @@ def log_list_and_create_view(request):
 
     if request.method == 'GET':
         try:
-            response = httpx.get(f"{BACKEND_URL}/logs", headers=headers)
+            response = httpx.get(f"{BACKEND_URL}/logs/student", headers=headers,
+                                 params={"vacancyId": lowongan_id})
             response.raise_for_status() # Raises HTTPStatusError for 4xx/5xx responses
             logs = response.json()
-            return render(request, "logs/log_list.html", {"logs": logs, "token": headers["Authorization"].split(" ")[1]})
+            return render(request, "logs/log_list.html", {
+                "logs": logs, 
+                "lowongan_id": lowongan_id,
+                "token": headers["Authorization"].split(" ")[1] # Token might not be needed here anymore if create form is gone
+            })
         except httpx.HTTPStatusError as e:
             # You might want to pass specific error messages to the template
             return HttpResponse(f"Error fetching logs from backend: {e.response.status_code} - {e.response.text}", status=e.response.status_code)
@@ -47,29 +52,90 @@ def log_list_and_create_view(request):
             # Catch other potential errors, e.g., response.json() failing
             return HttpResponse(f"An unexpected error occurred: {str(e)}", status=500)
 
+    return HttpResponse("Method Not Allowed", status=405)
+
+
+@csrf_exempt
+def log_create_view(request, lowongan_id):
+    """
+    Handles creation of a new log for a specific lowongan_id.
+    GET: Renders the log creation form.
+    POST: Submits the new log data to the backend.
+    Corresponds to LogController POST /logs/{vacancyId}
+    """
+    headers = get_auth_headers(request)
+    if not headers:
+        return redirect("authentication:login")
+
+    if request.method == 'GET':
+        return render(request, "logs/log_create.html", {
+            "lowongan_id": lowongan_id,
+            "token": headers["Authorization"].split(" ")[1] # For CSRF or if form needs it, though headers are preferred for API
+        })
+
     elif request.method == 'POST':
         try:
-            # Assuming log data comes from form fields. Adjust keys as necessary.
+            log_date_str = request.POST.get("logDate") # "YYYY-MM-DD"
+            start_time_str = request.POST.get("startTime") # "HH:MM"
+            end_time_str = request.POST.get("endTime")   # "HH:MM"
             log_data = {
                 "title": request.POST.get("title"),
-                "content": request.POST.get("content"),
-                # Add other fields relevant to your log model
+                "description": request.POST.get("description"),
+                "category": request.POST.get("category"),
+                "logDate": request.POST.get("logDate"), # Expects "YYYY-MM-DD"
+                "startTime": f"{log_date_str}T{start_time_str}:00", # e.g., "2023-10-27T10:00:00"
+                "endTime": f"{log_date_str}T{end_time_str}:00",     # e.g., "2023-10-27T11:00:00"
+                # vacancyId is part of the URL, studentId is set by backend
             }
-            # Basic validation
-            if not log_data["title"] or not log_data["content"]:
-                return HttpResponse("Title and content are required.", status=400)
 
-            response = httpx.post(f"{BACKEND_URL}/logs", headers=headers, json=log_data)
+            # Basic validation (can be more extensive)
+            if not all([log_data["title"], log_data["description"], log_data["category"], log_data["logDate"], log_data["startTime"], log_data["endTime"]]):
+                # Pass error message and re-render form
+                return render(request, "logs/log_create.html", {
+                    "lowongan_id": lowongan_id,
+                    "token": headers["Authorization"].split(" ")[1],
+                    "error_message": "All fields are required.",
+                    "form_data": request.POST # To repopulate form
+                }, status=400)
+
+            # The backend endpoint is /logs/{vacancyId}
+            response = httpx.post(f"{BACKEND_URL}/logs/{lowongan_id}", headers=headers, json=log_data)
             
-            if response.status_code == 201 or response.status_code == 200: # 201 Created is typical for POST success
-                # Redirect to the log list or the newly created log's detail page
-                return redirect("logs:log_list") # Assuming 'log_list' is the name of this view's URL pattern
+            if response.status_code == 201: # 201 Created is typical for POST success
+                # Redirect to the log list for this lowongan_id
+                return redirect("log:log_list_view", lowongan_id=lowongan_id)
             else:
-                return HttpResponse(f"Failed to create log: {response.status_code} - {response.text}", status=response.status_code)
+                # Pass error message and re-render form
+                error_detail = response.text
+                try:
+                    error_json = response.json()
+                    if isinstance(error_json, list):
+                        error_detail = ", ".join(error_json)
+                    elif isinstance(error_json, dict) and "message" in error_json:
+                        error_detail = error_json["message"]
+                except ValueError: # Not JSON
+                    pass
+
+                return render(request, "logs/log_create.html", {
+                    "lowongan_id": lowongan_id,
+                    "token": headers["Authorization"].split(" ")[1],
+                    "error_message": f"Failed to create log: {response.status_code} - {error_detail}",
+                    "form_data": request.POST # To repopulate form
+                }, status=response.status_code)
         except httpx.RequestError:
-            return HttpResponse("Failed to connect to backend service to create log.", status=503)
+            return render(request, "logs/log_create.html", {
+                "lowongan_id": lowongan_id,
+                "token": headers["Authorization"].split(" ")[1],
+                "error_message": "Failed to connect to backend service to create log.",
+                "form_data": request.POST # To repopulate form
+            }, status=503)
         except Exception as e:
-            return HttpResponse(f"An unexpected error occurred during log creation: {str(e)}", status=500)
+            return render(request, "logs/log_create.html", {
+                "lowongan_id": lowongan_id,
+                "token": headers["Authorization"].split(" ")[1],
+                "error_message": f"An unexpected error occurred during log creation: {str(e)}",
+                "form_data": request.POST # To repopulate form
+            }, status=500)
 
     return HttpResponse("Method Not Allowed", status=405)
 
@@ -89,7 +155,44 @@ def log_update_form_view(request, log_id):
             response = httpx.get(f"{BACKEND_URL}/logs/{log_id}", headers=headers)
             response.raise_for_status()
             log_data = response.json()
-            return render(request, "logs/log_update_form.html", {"log": log_data, "token": headers["Authorization"].split(" ")[1]})
+
+            # Prepare data for the form, especially splitting datetime fields
+            # Assuming backend returns startTime and endTime as full ISO strings
+            # And logDate might be part of startTime or a separate YYYY-MM-DD field
+            
+            # If logDate is a separate field and already YYYY-MM-DD
+            form_log_date = log_data.get("logDate") 
+
+            # If startTime/endTime are full ISO strings like "2023-10-27T10:00:00"
+            try:
+                start_datetime_obj = datetime.fromisoformat(log_data.get("startTime", "").replace("Z", "+00:00"))
+                form_start_time = start_datetime_obj.strftime('%H:%M')
+                if not form_log_date: # If logDate wasn't a separate field, derive from startTime
+                     form_log_date = start_datetime_obj.strftime('%Y-%m-%d')
+            except ValueError:
+                form_start_time = "" # Handle potential parsing errors or missing data
+
+            try:
+                end_datetime_obj = datetime.fromisoformat(log_data.get("endTime", "").replace("Z", "+00:00"))
+                form_end_time = end_datetime_obj.strftime('%H:%M')
+            except ValueError:
+                form_end_time = ""
+
+            context = {
+                "log": log_data, # Original log data
+                "form_data": { # Data formatted for form pre-population
+                    "id": log_data.get("id"),
+                    "title": log_data.get("title"),
+                    "description": log_data.get("description"),
+                    "category": log_data.get("category"),
+                    "logDate": form_log_date,
+                    "startTime": form_start_time,
+                    "endTime": form_end_time,
+                },
+                "lowongan_id": log_data.get("vacancyId"), # For the "Back to list" link
+                "token": headers["Authorization"].split(" ")[1]
+            }
+            return render(request, "logs/log_update_form.html", context)
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 404:
                 return HttpResponse("Log not found.", status=404)
@@ -101,80 +204,215 @@ def log_update_form_view(request, log_id):
 
     elif request.method == 'POST': # Form submission, to be sent as PATCH
         try:
+            log_date_str = request.POST.get("logDate")    # "YYYY-MM-DD"
+            start_time_str = request.POST.get("startTime") # "HH:MM"
+            end_time_str = request.POST.get("endTime")    # "HH:MM"
+
             updated_data = {
                 "title": request.POST.get("title"),
-                "content": request.POST.get("content"),
-                # Add other fields that can be updated
+                "description": request.POST.get("description"),
+                "category": request.POST.get("category"),
+                "logDate": log_date_str,
+                # Backend might expect full ISO datetime for startTime and endTime
+                "startTime": f"{log_date_str}T{start_time_str}:00" if log_date_str and start_time_str else None,
+                "endTime": f"{log_date_str}T{end_time_str}:00" if log_date_str and end_time_str else None,
             }
-            # Filter out None values if backend expects only provided fields for PATCH
-            updated_data = {k: v for k, v in updated_data.items() if v is not None}
+            
+            # Filter out fields not provided or None, if backend expects partial updates for PATCH
+            # If a field is intentionally cleared, it might need to be sent as an empty string or null
+            # depending on backend API contract. For now, filtering None.
+            payload = {k: v for k, v in updated_data.items() if v is not None}
 
-            if not updated_data:
-                 return HttpResponse("No data provided for update.", status=400)
+            if not payload: # if all fields were None or empty after filtering
+                 # Re-render form with an error if no actual data to update
+                # Fetch original data again to populate form
+                get_response = httpx.get(f"{BACKEND_URL}/logs/{log_id}", headers=headers)
+                get_response.raise_for_status()
+                original_log_data = get_response.json()
+                # Prepare data for the form as in GET
+                try:
+                    start_datetime_obj = datetime.fromisoformat(original_log_data.get("startTime", "").replace("Z", "+00:00"))
+                    form_start_time = start_datetime_obj.strftime('%H:%M')
+                    form_log_date = start_datetime_obj.strftime('%Y-%m-%d')
+                except ValueError: form_start_time, form_log_date = "", ""
+                try:
+                    end_datetime_obj = datetime.fromisoformat(original_log_data.get("endTime", "").replace("Z", "+00:00"))
+                    form_end_time = end_datetime_obj.strftime('%H:%M')
+                except ValueError: form_end_time = ""
 
-            response = httpx.patch(f"{BACKEND_URL}/logs/{log_id}", headers=headers, json=updated_data)
+                return render(request, "logs/log_update_form.html", {
+                    "log": original_log_data,
+                     "form_data": { # Repopulate with original data if error before sending
+                        "id": original_log_data.get("id"),
+                        "title": original_log_data.get("title"),
+                        "description": original_log_data.get("description"),
+                        "category": original_log_data.get("category"),
+                        "logDate": form_log_date,
+                        "startTime": form_start_time,
+                        "endTime": form_end_time,
+                    },
+                    "lowongan_id": original_log_data.get("vacancyId"),
+                    "token": headers["Authorization"].split(" ")[1],
+                    "error_message": "No data provided for update. At least one field must be changed.",
+                }, status=400)
+
+
+            response = httpx.patch(f"{BACKEND_URL}/logs/{log_id}", headers=headers, json=payload)
             
             if response.status_code == 200 or response.status_code == 204: # 200 OK or 204 No Content
-                return redirect("logs:log_list") # Or to the log detail page
+                vacancy_id_for_redirect = request.POST.get("vacancyId") # Get from hidden input if available
+                if not vacancy_id_for_redirect:
+                    # If PATCH response contains the updated log with vacancyId
+                    try:
+                        updated_log_data = response.json() # May fail if 204 No Content
+                        vacancy_id_for_redirect = updated_log_data.get("vacancyId")
+                    except Exception: # If response is 204 or doesn't have JSON body
+                        # Try to fetch the log again to get its vacancyId
+                        try:
+                            refetch_response = httpx.get(f"{BACKEND_URL}/logs/{log_id}", headers=headers)
+                            refetch_response.raise_for_status()
+                            vacancy_id_for_redirect = refetch_response.json().get("vacancyId")
+                        except Exception:
+                            vacancy_id_for_redirect = None # Could not determine
+
+                if vacancy_id_for_redirect:
+                    return redirect("log:log_list_view", lowongan_id=vacancy_id_for_redirect)
+                else:
+                    # Fallback: attempt to get from referrer or a generic logs page.
+                    # This might lead to user confusion if vacancyId is crucial for log_list_view.
+                    # Consider a more robust way to always have vacancyId.
+                    return redirect(request.META.get('HTTP_REFERER', '/')) 
             else:
-                return HttpResponse(f"Failed to update log: {response.status_code} - {response.text}", status=response.status_code)
+                error_detail = response.text
+                try:
+                    error_json = response.json()
+                    if isinstance(error_json, list): error_detail = ", ".join(error_json)
+                    elif isinstance(error_json, dict) and "message" in error_json: error_detail = error_json["message"]
+                except ValueError: pass
+                
+                # Re-render form with error message and submitted data
+                # Fetch original data again to populate form if some fields are missing from POST
+                get_response = httpx.get(f"{BACKEND_URL}/logs/{log_id}", headers=headers)
+                original_log_data = get_response.json() if get_response.status_code == 200 else {}
+
+                return render(request, "logs/log_update_form.html", {
+                    "log": original_log_data, # To get ID and original vacancyId
+                    "form_data": request.POST, # Repopulate with submitted data
+                    "lowongan_id": original_log_data.get("vacancyId", request.POST.get("vacancyId")), # for back link
+                    "token": headers["Authorization"].split(" ")[1],
+                    "error_message": f"Failed to update log: {response.status_code} - {error_detail}",
+                }, status=response.status_code)
         except httpx.RequestError:
-            return HttpResponse("Failed to connect to backend service for update.", status=503)
+            # Fetch original data for form repopulation
+            try:
+                get_response = httpx.get(f"{BACKEND_URL}/logs/{log_id}", headers=headers)
+                original_log_data = get_response.json() if get_response.status_code == 200 else {}
+                start_datetime_obj = datetime.fromisoformat(original_log_data.get("startTime", "").replace("Z", "+00:00"))
+                form_s_time = start_datetime_obj.strftime('%H:%M')
+                form_l_date = start_datetime_obj.strftime('%Y-%m-%d')
+                end_datetime_obj = datetime.fromisoformat(original_log_data.get("endTime", "").replace("Z", "+00:00"))
+                form_e_time = end_datetime_obj.strftime('%H:%M')
+            except: # Broad except if fetching original data fails or parsing fails
+                original_log_data = {}
+                form_l_date, form_s_time, form_e_time = "", "", ""
+
+
+            return render(request, "logs/log_update_form.html", {
+                "log": original_log_data,
+                "form_data": request.POST, # Repopulate with data user tried to submit
+                 "lowongan_id": original_log_data.get("vacancyId", request.POST.get("vacancyId")),
+                "token": headers["Authorization"].split(" ")[1],
+                "error_message": "Failed to connect to backend service for update.",
+            }, status=503)
         except Exception as e:
-            return HttpResponse(f"An unexpected error occurred during log update: {str(e)}", status=500)
+            # Fetch original data for form repopulation
+            try:
+                get_response = httpx.get(f"{BACKEND_URL}/logs/{log_id}", headers=headers)
+                original_log_data = get_response.json() if get_response.status_code == 200 else {}
+            except: original_log_data = {}
+
+            return render(request, "logs/log_update_form.html", {
+                "log": original_log_data,
+                "form_data": request.POST,
+                 "lowongan_id": original_log_data.get("vacancyId", request.POST.get("vacancyId")),
+                "token": headers["Authorization"].split(" ")[1],
+                "error_message": f"An unexpected error occurred during log update: {str(e)}",
+            }, status=500)
 
     return HttpResponse("Method Not Allowed", status=405)
-
 
 @csrf_exempt # If POST is from a non-Django form
 def log_delete_confirmation_view(request, log_id):
     """
     Corresponds to LogController DELETE /logs/{id} (delete a log)
-    GET: Display confirmation page.
+    GET: Display confirmation page (without fetching full log details).
     POST: Send DELETE request to backend.
     """
-    # For GET request, fetch token from session to display page securely
-    if request.method == 'GET':
-        auth_headers_session = get_auth_headers(request)
-        if not auth_headers_session:
-            return redirect("authentication:login")
-        try:
-            # Optionally fetch log details to display on confirmation page
-            response = httpx.get(f"{BACKEND_URL}/logs/{log_id}", headers=auth_headers_session)
-            response.raise_for_status()
-            log_data = response.json()
-            return render(request, "logs/log_delete_confirm.html", {"log": log_data, "log_id": log_id, "token": auth_headers_session["Authorization"].split(" ")[1]})
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 404:
-                return HttpResponse("Log not found.", status=404)
-            return HttpResponse(f"Error fetching log details: {e.response.status_code}", status=e.response.status_code)
-        except httpx.RequestError:
-            return HttpResponse("Failed to connect to backend service.", status=503)
+    auth_headers = get_auth_headers(request)
+    if not auth_headers:
+        return redirect("authentication:login")
 
+    if request.method == 'GET':
+        # No need to fetch log details, just pass log_id and token for the form
+        return render(request, "logs/log_delete_confirm.html", {
+            "log_id": log_id,
+            "token": auth_headers["Authorization"].split(" ")[1] # For the form in the template
+        })
 
     elif request.method == 'POST': # Confirmation submitted
-        # Following the example's pattern for delete, token from POST
-        token = request.POST.get("token")
-        if not token:
-            # Fallback to session token if not in POST, or enforce POST token
-            auth_headers_session = get_auth_headers(request)
-            if not auth_headers_session:
-                 return HttpResponse("Authentication token not provided.", status=401)
-            headers_for_delete = auth_headers_session
-        else:
-            headers_for_delete = {"Authorization": f"Bearer {token}"}
+        # Token for DELETE operation should come from the authenticated session/headers
+        # The form might POST a CSRF token, but auth should be via headers
         
         try:
-            response = httpx.delete(f"{BACKEND_URL}/logs/{log_id}", headers=headers_for_delete)
+            response = httpx.delete(f"{BACKEND_URL}/logs/{log_id}", headers=auth_headers)
+            lowongan_id_for_redirect = request.POST.get("vacancyId")
+            if response.status_code in [200, 204]:
+                try:
+                    messages.success(request, f"Log ID {log_id} has been successfully deleted.")
+                    response_data = response.json() # If backend returns data like {"message": "...", "vacancyId": ...}
+                    lowongan_id_for_redirect = response_data.get("vacancyId")
+                except Exception:
+                    pass # No JSON body or vacancyId not present
             
-            if response.status_code == 200 or response.status_code == 204: # 204 No Content is common for DELETE
-                return redirect("logs:log_list") # Redirect to log list
+                if lowongan_id_for_redirect:
+                    return redirect("log:log_list_view", lowongan_id=lowongan_id_for_redirect)
+                else:
+                    return redirect(request.META.get('HTTP_REFERER', '/')) # Fallback
+            
+            elif response.status_code == 404:
+                 return render(request, "logs/log_delete_confirm.html", {
+                    "log_id": log_id,
+                    "token": auth_headers["Authorization"].split(" ")[1],
+                    "error_message": "Log not found. It may have already been deleted."
+                }, status=404)
             else:
-                return HttpResponse(f"Failed to delete log: {response.status_code} - {response.text}", status=response.status_code)
+                error_detail = response.text
+                try:
+                    error_json = response.json()
+                    if isinstance(error_json, dict) and "message" in error_json:
+                        error_detail = error_json["message"]
+                    elif isinstance(error_json, list):
+                         error_detail = ", ".join(error_json)
+                except ValueError:
+                    pass # Not JSON
+                
+                return render(request, "logs/log_delete_confirm.html", {
+                    "log_id": log_id,
+                    "token": auth_headers["Authorization"].split(" ")[1],
+                    "error_message": f"Failed to delete log: {response.status_code} - {error_detail}"
+                }, status=response.status_code)
         except httpx.RequestError:
-            return HttpResponse("Failed to connect to backend service to delete log.", status=503)
+            return render(request, "logs/log_delete_confirm.html", {
+                "log_id": log_id,
+                "token": auth_headers["Authorization"].split(" ")[1],
+                "error_message": "Failed to connect to backend service to delete log."
+            }, status=503)
         except Exception as e:
-            return HttpResponse(f"An unexpected error occurred during log deletion: {str(e)}", status=500)
+             return render(request, "logs/log_delete_confirm.html", {
+                "log_id": log_id,
+                "token": auth_headers["Authorization"].split(" ")[1],
+                "error_message": f"An unexpected error occurred: {str(e)}"
+            }, status=500)
 
     return HttpResponse("Method Not Allowed", status=405)
 
@@ -205,8 +443,16 @@ def log_verify_action_view(request, log_id):
             
             if response.status_code == 200:
                 # Redirect or return success message
-                # return redirect(request.META.get('HTTP_REFERER', 'logs:log_list')) # Redirect back or to list
-                return HttpResponse(f"Log {log_id} verification processed for action '{action}'.", status=200)
+                # To redirect to the specific lowongan's log list, you'd need lowongan_id.
+                # This might come from the log object itself if returned by the verify endpoint.
+                try:
+                    verified_log_data = response.json()
+                    vacancy_id = verified_log_data.get("vacancyId")
+                    if vacancy_id:
+                        return redirect("log:log_list", lowongan_id=vacancy_id)
+                except Exception:
+                    pass # Fallback
+                return redirect(request.META.get('HTTP_REFERER', '/'))
             else:
                 return HttpResponse(f"Failed to verify log {log_id}: {response.status_code} - {response.text}", status=response.status_code)
         except httpx.RequestError:
@@ -260,7 +506,7 @@ def message_list_and_add_view(request, log_id):
             
             if response.status_code == 201 or response.status_code == 200:
                 # Redirect back to the message list for this log
-                return redirect("logs:message_list_and_add", log_id=log_id) # Assuming URL name
+                return redirect("log:message_list_add", log_id=log_id) # Assuming URL name
             else:
                 return HttpResponse(f"Failed to add message: {response.status_code} - {response.text}", status=response.status_code)
         except httpx.RequestError:

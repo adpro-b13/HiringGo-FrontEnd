@@ -25,7 +25,7 @@ def delete_lowongan(request, id):
     except Exception:
         return HttpResponse("Gagal menghubungi server", status=500)
 
-def status_lamaran(request):
+def lamaran_diterima(request):
     token = request.session.get("auth_token")
     if not token:
         return redirect("authentication:login")
@@ -43,7 +43,7 @@ def status_lamaran(request):
         traceback.print_exc()
         return HttpResponse(f"🔥 Internal Error: {e}", status=500)
 
-    return render(request, "recruitment/status_lamaran.html", {
+    return render(request, "recruitment/lamaran_diterima.html", {
         "lamaran_list": lamaran_list
     })
 

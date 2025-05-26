@@ -24,7 +24,7 @@
     {% endif %}
 
     <h2>Create New Log</h2>
-    <form method="GET" action="{% url 'log:log_create' lowongan_id=lowongan_id %}">
+    <form method="POST" action="{% url 'log:log_list' %}">
         {% csrf_token %} <!-- Django CSRF token -->
         <input type="hidden" name="token" value="{{ token }}"> <!-- If your view expects token in POST for creation -->
         <div class="form-group">
@@ -44,12 +44,9 @@
     <table>
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Title</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Date</th>
-                <th>Start Time</th>
-                <th>End Time</th>
+                <th>Content Snippet</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -57,24 +54,29 @@
         <tbody>
             {% for log in logs %}
             <tr>
+                <td>{{ log.id }}</td>
                 <td>{{ log.title }}</td>
-                <td>{{ log.category | default:"N/A" }}</td>
-                <td>{{ log.description | slice:":100" }}{% if log.description|length > 100 %}...{% endif %}</td>
-                <td>{{ log.logDate | date:"Y-m-d" | default:"N/A" }}</td> {# Format: YYYY-MM-DD #}
-                <td>{{ log.startTime | date:"H:i" | default:"N/A" }}</td> {# Format: HH:MM (24-hour) #}
-                <td>{{ log.endTime | date:"H:i" | default:"N/A" }}</td>   {# Format: HH:MM (24-hour) #}
+                <td>{{ log.content|slice:":100" }}{% if log.content|length > 100 %}...{% endif %}</td>
                 <td>{{ log.status | default:"N/A" }}</td>
                 <td class="actions">
-                    <a href="{% url 'log:log_update_form' log_id=log.id %}">Edit</a>
-                    <a href="{% url 'log:log_delete_confirm' vacancy_id=lowongan_id log_id=log.id %}">Delete</a>
-                    <a href="{% url 'log:message_list_add' log_id=log.id %}">Messages</a>
+                    <a href="{% url 'log:message_list_and_add' log_id=log.id %}">Messages</a>
+                    <!-- Form for Verify Action -->
+                    <form method="POST" action="{% url 'log:log_verify_action' log_id=log.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="token" value="{{ token }}">
+                        <select name="action">
+                            <option value="ACCEPT">Accept</option>
+                            <option value="REJECT">Reject</option>
+                        </select>
+                        <button type="submit">Verify</button>
+                    </form>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     {% else %}
-    <p>Belum ada log untuk lowongan mata kuliah ini</p>
+    <p>No logs found.</p>
     {% endif %}
 </body>
 </html>
