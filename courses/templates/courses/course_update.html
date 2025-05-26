@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Edit Mata Kuliah{% endblock %}
+{% block content %}
+<h1>Edit Mata Kuliah</h1>
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="nama" class="form-label">Nama</label>
+        <input type="text" class="form-control" id="nama" name="nama" value="{{ course.nama }}" required>
+    </div>
+    <div class="mb-3">
+        <label for="deskripsi" class="form-label">Deskripsi</label>
+        <textarea class="form-control" id="deskripsi" name="deskripsi" required>{{ course.deskripsi }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label for="lecturers" class="form-label">Nama Dosen Pengampu (pisahkan dengan koma)</label>
+        <input type="text" class="form-control" id="lecturers" name="lecturers" value="{% if course.dosenPengampu %}{% for dosen in course.dosenPengampu %}{{ dosen.nama }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}">
+    </div>
+    <button type="submit" class="btn btn-primary">Simpan</button>
+    <a href="{% url 'courses:course_list' %}" class="btn btn-secondary">Kembali</a>
+</form>
+{% endblock %}
