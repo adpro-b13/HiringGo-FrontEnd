@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Daftar Mata Kuliah{% endblock %}
 {% block content %}
+{% include "navbar.html" %}
 <h1>Daftar Mata Kuliah</h1>
 <a href="{% url 'courses:course_create' %}" class="btn btn-success mb-3">Tambah Mata Kuliah</a>
 <table class="table table-striped">

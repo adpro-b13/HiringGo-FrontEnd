@@ -22,7 +22,7 @@ def dashboard_mahasiswa(request):
 
     token = request.session.get("auth_token")
     user_role = request.session.get("user_role")
-    if not token or user_role != "MAHASISWA":
+    if not token:
         return redirect("authentication:login")
     headers = {
         'Authorization': f'Bearer {token}',

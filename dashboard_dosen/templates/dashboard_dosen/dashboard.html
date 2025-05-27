@@ -1,3 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Dosen - HiringGo{% endblock %}
+{% block content %}
+{% include "navbar.html" %}
 <h1>Dashboard Dosen</h1>
 
 <ul>
@@ -13,3 +17,4 @@
 </ul>
 
 <a href="{% url 'my_lowongan' %}">🧑‍🏫 Lihat lowongan saya</a>
+{% endblock %}

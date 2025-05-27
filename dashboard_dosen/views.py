@@ -8,7 +8,7 @@ def dashboard_dosen_view(request):
     token = request.session.get("auth_token")
     user_role = request.session.get("user_role")
 
-    if not token or user_role != "DOSEN":
+    if not token or user_role != "DOSEN" or user_role != "ADMIN":
         return redirect("authentication:login")
 
     try:

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Edit Mata Kuliah{% endblock %}
 {% block content %}
+{% include "navbar.html" %}
 <h1>Edit Mata Kuliah</h1>
 <form method="post">
     {% csrf_token %}

@@ -5,16 +5,40 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- kiri: nama user + menu role-specific -->
       <ul class="navbar-nav me-auto">
-        {% if request.session.user_role == 'ADMIN' %}
-        <li class="nav-item"><a class="nav-link" href="{% url 'user_service:list_users' %}">Manajemen Users</a></li>
+        {% if request.session.auth_token %}
+        <li class="nav-item">
+          <span class="navbar-text">
+            Hi, {{ request.session.user_namaLengkap }}
+          </span>
+        </li>
         {% endif %}
+        {% if request.session.user_role == 'ADMIN' %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'user_service:list_users' %}">Manajemen Users</a>
+        </li>
+        {% endif %}
+        {% if request.session.user_role == 'DOSEN' or request.session.user_role == 'ADMIN' %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'dashboard_dosen' %}">Dashboard Dosen</a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'dashboard_mahasiswa' %}">Dashboard Mahasiswa</a>
+        </li>
       </ul>
+
+      <!-- kanan: login/logout -->
       <ul class="navbar-nav">
         {% if request.session.auth_token %}
-        <li class="nav-item"><a class="nav-link" href="{% url 'authentication:logout' %}">Logout</a></li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'authentication:logout' %}">Logout</a>
+        </li>
         {% else %}
-        <li class="nav-item"><a class="nav-link" href="{% url 'authentication:login' %}">Login</a></li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'authentication:login' %}">Login</a>
+        </li>
         {% endif %}
       </ul>
     </div>
