@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Verifikasi Log untuk {{ lowongan.mataKuliah }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Verifikasi Log untuk Lowongan: {{ lowongan.mataKuliah }}</h2>
+    <p>Semester {{ lowongan.semester }} {{ lowongan.tahunAjaran }}</p>
+    <a href="{% url 'my_lowongan' %}" class="btn btn-secondary mb-3">Kembali ke Lowongan Saya</a>
+
+    {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    {% if logs %}
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID Log</th>
+                    <th>Judul</th>
+                    <th>Deskripsi</th>
+                    <th>Kategori</th>
+                    <th>Tanggal</th>
+                    <th>Waktu Mulai</th>
+                    <th>Waktu Selesai</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.id }}</td>
+                    <td>{{ log.title }}</td>
+                    <td>{{ log.description }}</td>
+                    <td>{{ log.category }}</td>
+                    <td>{{ log.logDate|date:"Y-m-d" }}</td>
+                    <td>{{ log.startTime|date:"H:i" }}</td>
+                    <td>{{ log.endTime|date:"H:i" }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if log.status == 'REPORTED' %}bg-warning text-dark{% endif %}
+                            {% if log.status == 'ACCEPTED' %}bg-success{% endif %}
+                            {% if log.status == 'REJECTED' %}bg-danger{% endif %}
+                            {% if log.status == 'PENDING' %}bg-secondary{% endif %}
+                        ">{{ log.status }}</span>
+                    </td>
+                    <td>
+                        {% if log.status == 'REPORTED' %}
+                            <form action="{% url 'process_log_verification' log.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="ACCEPT">
+                                <input type="hidden" name="lowongan_id" value="{{ lowongan_id }}">
+                                <button type="submit" class="btn btn-success btn-sm">Terima</button>
+                            </form>
+                            <form action="{% url 'process_log_verification' log.id %}" method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="REJECT">
+                                <input type="hidden" name="lowongan_id" value="{{ lowongan_id }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Tolak</button>
+                            </form>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            Tidak ada log yang perlu diverifikasi untuk lowongan ini, atau semua log sudah diproses.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

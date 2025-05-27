@@ -27,6 +27,4 @@ urlpatterns = [
     # Corresponds to LogController GET /logs/{id}/messages (list messages)
     # and POST /logs/{id}/messages (add message)
     path('<int:log_id>/messages/', views.message_list_and_add_view, name='message_list_add'),
-
-    path('applications/status/', views.view_application_status, name='view_application_status'),
 ]

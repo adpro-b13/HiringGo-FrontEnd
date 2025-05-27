@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Honor - HiringGo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <h2>Dashboard Honor</h2>
+    <p class="text-muted">{{ "now"|date:"d F Y" }}</p>
+
+    <!-- Navigasi -->
+    <div class="mb-3">
+        <a href="{% url 'dashboard_mahasiswa' %}" class="btn btn-secondary btn-sm">← Kembali ke Dashboard</a>
+    </div>
+
+    <!-- Ringkasan Total -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h4>{{ total_jam_log }}</h4>
+                    <p class="text-muted">Total Jam Log</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h4>Rp {{ total_uang_insentif|floatformat:0 }}</h4>
+                    <p class="text-muted">Total Insentif</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rincian Per Lowongan -->
+    <div class="card">
+        <div class="card-header">
+            <strong>Rincian Honor per Lowongan</strong>
+        </div>
+        <div class="card-body">
+            {% if rincian_honor %}
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Mata Kuliah</th>
+                            <th>Semester</th>
+                            <th>Tahun Ajaran</th>
+                            <th>Jam Log</th>
+                            <th>Honor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in rincian_honor %}
+                            <tr>
+                                <td>{{ item.mataKuliah }}</td>
+                                <td>{{ item.semester }}</td>
+                                <td>{{ item.tahunAjaran }}</td>
+                                <td>{{ item.jam_log }}</td>
+                                <td>Rp {{ item.uang_insentif|floatformat:0 }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-center text-muted">Belum ada data honor yang tersedia.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

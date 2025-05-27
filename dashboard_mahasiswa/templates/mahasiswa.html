@@ -6,6 +6,12 @@
     <h2>Dashboard Mahasiswa</h2>
     <p class="text-muted">{{ "now"|date:"d F Y" }}</p>
 
+    <!-- Navigasi Cepat -->
+    <div class="mb-3">
+        <a href="{% url 'recruitment:lowongan_list' %}" class="btn btn-outline-primary btn-sm">Lihat Semua Lowongan</a>
+        <a href="{% url 'dashboard_honor' %}" class="btn btn-outline-success btn-sm">Detail Honor</a>
+    </div>
+
     <!-- Error Messages -->
     {% if error_messages %}
         {% for error in error_messages %}
@@ -84,6 +90,7 @@
                             <th>Mata Kuliah</th>
                             <th>Semester</th>
                             <th>Tahun Ajaran</th>
+                            <th>Log</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -92,6 +99,9 @@
                                 <td>{{ lowongan.mataKuliah }}</td>
                                 <td>{{ lowongan.semester }}</td>
                                 <td>{{ lowongan.tahunAjaran }}</td>
+                                <td>
+                                    <a href="{% url 'log_list_view' lowongan.id %}" class="btn btn-sm btn-outline-info">Lihat Log</a>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -99,7 +109,7 @@
             {% else %}
                 <p class="text-center text-muted">Belum ada lowongan yang diterima.</p>
                 <div class="text-center">
-                    <a href="{% url 'list_lowongan_tersedia' %}" class="btn btn-primary">Cari Lowongan</a>
+                    <a href="{% url 'recruitment:lowongan_list' %}" class="btn btn-primary">Cari Lowongan</a>
                 </div>
             {% endif %}
         </div>

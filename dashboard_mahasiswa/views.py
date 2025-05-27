@@ -146,10 +146,11 @@ def daftar_lowongan(request, lowongan_id):
     return redirect('dashboard_mahasiswa')
 
 
-def list_lowongan_tersedia(request):
-
+def list_lowongan_diterima(request):
     token = request.session.get("auth_token")
     user_role = request.session.get("user_role")
+    
+    # Uncomment jika ingin menerapkan authentication check
     # if not token or user_role != "MAHASISWA":
     #     return redirect("authentication:login")
     
@@ -159,28 +160,36 @@ def list_lowongan_tersedia(request):
     }
     
     context = {
-        'lowongan_list': [],
+        'lowongan_diterima_list': [],
         'error_message': None
     }
     
     try:
         with httpx.Client() as client:
+            # Memanggil endpoint /status untuk mendapatkan lowongan yang diterima
             response = client.get(
-                f"{BACKEND_URL_RECRUITMENT}/api/lowongan/list",
+                f"{BACKEND_URL_RECRUITMENT}/api/lowongan/status",
                 headers=headers,
                 timeout=10
             )
             
             if response.status_code == 200:
-                context['lowongan_list'] = response.json()
+                context['lowongan_diterima_list'] = response.json()
+            elif response.status_code == 401:
+                context['error_message'] = 'Token tidak valid atau sudah expired'
+            elif response.status_code == 403:
+                context['error_message'] = 'Akses ditolak. Hanya mahasiswa yang dapat mengakses'
             else:
-                context['error_message'] = 'Gagal mengambil data lowongan'
+                context['error_message'] = f'Gagal mengambil data lowongan diterima (Status: {response.status_code})'
                 
+    except httpx.TimeoutException:
+        context['error_message'] = 'Request timeout. Silakan coba lagi'
+    except httpx.ConnectError:
+        context['error_message'] = 'Tidak dapat terhubung ke server'
     except Exception as e:
         context['error_message'] = f'Error: {str(e)}'
     
-    return render(request, 'recruitment/lowongan_list.html', context)
-
+    return render(request, 'recruitment/lamaran_diterima.html', context)
 
 def my_logs(request):
     token = request.session.get("auth_token")
@@ -217,3 +226,40 @@ def my_logs(request):
         context['error_message'] = f'Error: {str(e)}'
 
     return render(request, 'log/log_list.html', context)
+
+def dashboard_honor(request):
+
+    token = request.session.get("auth_token")
+    user_role = request.session.get("user_role")
+    user_id = request.session.get("user_id")
+
+    # if not token or user_role != "MAHASISWA":
+    #     return redirect("authentication:login")
+
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
+    
+    context = {
+        'honor_details': None,
+        'error_message': None
+    }
+    
+    try:
+        with httpx.Client() as client:
+            response = client.get(
+                f"{BACKEND_URL_RECRUITMENT}/dashboard/honor/details",
+                headers=headers,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                context['honor_details'] = response.json()
+            else:
+                context['error_message'] = f'Gagal mengambil data honor (Status: {response.status_code})'
+                
+    except Exception as e:
+        context['error_message'] = f'Error: {str(e)}'
+    
+    return render(request, 'dashboard_mahasiswa/dashboard_honor.html', context)

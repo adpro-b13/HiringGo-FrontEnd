@@ -4,8 +4,10 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 
 BACKEND_URL = "http://hiringultramyb13.duckdns.org:8080"
+BACKEND_URL_LOG = "http://ec2-54-208-131-6.compute-1.amazonaws.com" # Added for log service
 
 def delete_lowongan(request, id):
     if request.method != "POST":
@@ -272,3 +274,93 @@ def lihat_pelamar(request, id):
         "pelamar_list": pelamar_list,
         "lowongan_id": id
     })
+
+@csrf_exempt
+def verify_lowongan_logs(request, lowongan_id):
+    token = request.session.get("auth_token")
+    user_role = request.session.get("user_role")
+
+    if not token:
+        return redirect("authentication:login")
+    if user_role != "DOSEN":
+        return HttpResponse("Forbidden: Hanya Dosen yang dapat mengakses halaman ini.", status=403)
+
+    headers = {"Authorization": f"Bearer {token}"}
+    logs_to_verify = []
+    error_message = None
+
+    try:
+        # Fetch lowongan details to display its name or title
+        lowongan_detail_response = httpx.get(
+            f"{BACKEND_URL}/api/lowongan/{lowongan_id}",
+            headers=headers
+        )
+        lowongan_detail_response.raise_for_status()
+        lowongan = lowongan_detail_response.json()
+
+        # Fetch logs for this lowongan that need verification
+        response = httpx.get(
+            f"{BACKEND_URL_LOG}/logs/lecturer",
+            headers=headers,
+            params={"vacancyId": lowongan_id}
+        )
+        response.raise_for_status()
+        logs_to_verify = response.json()
+    except httpx.HTTPStatusError as e:
+        error_message = f"Gagal mengambil data: {e.response.status_code} - {e.response.text}"
+    except httpx.RequestError as e:
+        error_message = f"Gagal menghubungi server: {str(e)}"
+    except Exception as e:
+        error_message = f"Terjadi kesalahan: {str(e)}"
+
+    return render(request, "recruitment/verify_page.html", {
+        "logs": logs_to_verify,
+        "lowongan": lowongan,
+        "lowongan_id": lowongan_id,
+        "token": token,
+        "error_message": error_message
+    })
+
+@csrf_exempt
+def process_log_verification(request, log_id):
+    token = request.session.get("auth_token")
+    user_role = request.session.get("user_role")
+
+    if not token:
+        return redirect("authentication:login")
+    if user_role != "DOSEN":
+        return HttpResponse("Forbidden: Hanya Dosen yang dapat melakukan aksi ini.", status=403)
+
+    if request.method == "POST":
+        action = request.POST.get("action") # "ACCEPT" or "REJECT"
+        # lowongan_id_for_redirect = request.POST.get("lowongan_id") # Get lowongan_id from hidden input
+
+        if not action:
+            return HttpResponse("Aksi tidak valid.", status=400)
+
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        try:
+            response = httpx.post(
+                f"{BACKEND_URL_LOG}/logs/{log_id}/verify",
+                headers=headers,
+                params={"action": action.upper()}
+            )
+            response.raise_for_status()
+            verified_log_data = response.json()
+            lowongan_id_for_redirect = verified_log_data.get("vacancyId")
+
+            if lowongan_id_for_redirect:
+                return redirect(reverse('verify_lowongan_logs', kwargs={'lowongan_id': lowongan_id_for_redirect}))
+            else:
+                # Fallback if vacancyId is not in response, though it should be.
+                # This might lead to an error or redirect to a generic page.
+                return redirect(request.META.get("HTTP_REFERER", "my_lowongan"))
+
+        except httpx.HTTPStatusError as e:
+            # Handle error, maybe show a message
+            return HttpResponse(f"Gagal memproses verifikasi log: {e.response.status_code} - {e.response.text}", status=e.response.status_code)
+        except Exception as e:
+            return HttpResponse(f"Terjadi kesalahan saat verifikasi: {str(e)}", status=500)
+    
+    return HttpResponse("Metode tidak diizinkan.", status=405)

@@ -8,12 +8,12 @@ def dashboard_dosen_view(request):
     token = request.session.get("auth_token")
     user_role = request.session.get("user_role")
 
-    if not token or user_role != "DOSEN" or user_role != "ADMIN":
+    if not token or (user_role != "DOSEN"  and user_role != "ADMIN"):
         return redirect("authentication:login")
 
     try:
         response = httpx.get(
-            f"{BACKEND_URL}/api/lowongan/my",
+            f"{BACKEND_URL}/api/lowongan/list",
             headers={"Authorization": f"Bearer {token}"}
         )
         print(token)
