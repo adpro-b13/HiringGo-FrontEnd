@@ -26,4 +26,5 @@ urlpatterns = [
     path('log/', include('log.urls')),
     path('', include('dashboard_mahasiswa.urls')),
     path('courses/', include('courses.urls', namespace='courses')),
+    path('dashboard/admin/', include('dashboard_admin.urls', namespace='dashboard_admin')),
 ]

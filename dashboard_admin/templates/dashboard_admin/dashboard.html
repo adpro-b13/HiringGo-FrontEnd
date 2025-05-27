@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Admin - HiringGo{% endblock %}
+
+{% block content %}
+{% include "navbar.html" %}
+<div class="container py-4">
+  <h1>Dashboard Admin</h1>
+  <ul class="list-group mb-4">
+    <li class="list-group-item">Jumlah Dosen: {{ jumlah_dosen }}</li>
+    <li class="list-group-item">Jumlah Mahasiswa: {{ jumlah_mahasiswa }}</li>
+    <li class="list-group-item">Jumlah Mata Kuliah: {{ jumlah_mata_kuliah }}</li>
+    <li class="list-group-item">Jumlah Lowongan: {{ jumlah_lowongan }}</li>
+  </ul>
+  <h2>Menu Admin</h2>
+  <ul>
+    <li><a href="{% url 'user_service:list_users' %}">Manajemen Users</a></li>
+    <li><a href="{% url 'courses:course_list' %}">Manajemen Mata Kuliah</a></li>
+    <li><a href="{% url 'dashboard_dosen' %}">Dashboard Dosen</a></li>
+    <li><a href="{% url 'dashboard_mahasiswa' %}">Dashboard Mahasiswa</a></li>
+  </ul>
+</div>
+{% endblock %}

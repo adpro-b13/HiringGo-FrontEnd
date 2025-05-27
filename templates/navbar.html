@@ -16,7 +16,7 @@
         {% endif %}
         {% if request.session.user_role == 'ADMIN' %}
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'user_service:list_users' %}">Manajemen Users</a>
+          <a class="nav-link" href="{% url 'dashboard_admin:dashboard_admin' %}">Dashboard Admin</a>
         </li>
         {% endif %}
         {% if request.session.user_role == 'DOSEN' or request.session.user_role == 'ADMIN' %}

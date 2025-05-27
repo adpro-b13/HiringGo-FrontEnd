@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'log',
     'dashboard_mahasiswa',
     'courses',  # <-- add this line
+    'dashboard_admin', 
 ]
 
 MIDDLEWARE = [
