@@ -20,11 +20,9 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
-<<<<<<< HEAD
     path('lowongan/', include('recruitment.urls')),
     path('dashboard/dosen/', include('dashboard_dosen.urls')),
     path('users/', include('user_service.urls')), 
-=======
     path('log/', include('log.urls')),
->>>>>>> e7a3254 (initialize log fe)
+    path('', include('dashboard_mahasiswa.urls')),
 ]

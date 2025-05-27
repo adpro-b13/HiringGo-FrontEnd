@@ -83,7 +83,7 @@ def login_view(request):
                 elif auth_data.get('role') == 'DOSEN':
                     return redirect(reverse("dashboard_dosen")) # Ganti dengan URL dashboard dosen
                 elif auth_data.get('role') == 'MAHASISWA':
-                    return redirect('nama_app_dashboard_mahasiswa:dashboard') # Ganti dengan URL dashboard mahasiswa
+                    return redirect(reverse("dashboard_mahasiswa")) # Ganti dengan URL dashboard mahasiswa
                 else:
                     return redirect('home_page_atau_app_lain') # Halaman default jika role tidak dikenali
 

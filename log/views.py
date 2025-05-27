@@ -537,7 +537,7 @@ def view_application_status(request):
 
     try:
         # The endpoint is /status at hiringultramyb13.duckdns.org:8080
-        response = httpx.get(f"hiringultramyb13.duckdns.org:8080/status", headers=headers)
+        response = httpx.get(f"http://hiringultramyb13.duckdns.org:8080/status", headers=headers)
         response.raise_for_status() # Raises HTTPStatusError for 4xx/5xx responses
         
         accepted_applications = response.json()
