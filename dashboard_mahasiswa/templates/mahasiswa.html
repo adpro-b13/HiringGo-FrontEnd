@@ -12,7 +12,7 @@
 
     <!-- Navigasi Cepat -->
     <div class="mb-3">
-        <a href="{% url 'lowongan_list' %}" class="btn btn-outline-primary btn-sm">Lihat Semua Lowongan</a>
+        <a href="{% url 'recruitment:lowongan_list' %}" class="btn btn-outline-primary btn-sm">Lihat Semua Lowongan</a>
         <a href="{% url 'dashboard_honor' %}" class="btn btn-outline-success btn-sm">Detail Honor</a>
     </div>
 
@@ -113,7 +113,7 @@
             {% else %}
                 <p class="text-center text-muted">Belum ada lowongan yang diterima.</p>
                 <div class="text-center">
-                    <a href="{% url 'lowongan_list' %}" class="btn btn-primary">Cari Lowongan</a>
+                    <a href="{% url 'recruitment:lamaran_diterima' %}" class="btn btn-primary">Cari Lowongan</a>
                 </div>
             {% endif %}
         </div>
