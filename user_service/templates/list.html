@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+{% include "navbar.html" %}
 <h1>Daftar Users</h1>
 <a href="{% url 'user_service:create_user' %}">+ Buat User Baru</a>
 <table>

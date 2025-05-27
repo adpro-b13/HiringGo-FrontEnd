@@ -2,6 +2,7 @@
 {% extends "base.html" %}
 {% block title %}Update Role User{% endblock %}
 {% block content %}
+{% include "navbar.html" %}
 <h1>Update Role: {{ user.namaLengkap }}</h1>
 <form method="post">
   {% csrf_token %}

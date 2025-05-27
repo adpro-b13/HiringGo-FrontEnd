@@ -1,98 +1,105 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrasi - HiringGo</title>
-    <!-- Tambahkan link ke CSS framework jika ada (misal Bootstrap) -->
-    <style>
-        body { font-family: sans-serif; margin: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; }
-        input[type="text"], input[type="email"], input[type="password"], select {
-            width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;
+{% extends "base.html" %}
+
+{% block title %}Registrasi - HiringGo{% endblock %}
+
+{% block content %}
+<h2>Form Registrasi Akun Baru</h2>
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        {{ form.namaLengkap.label_tag }}
+        {{ form.namaLengkap }}
+        {% if form.namaLengkap.errors %}
+        <ul class="errorlist">
+            {% for error in form.namaLengkap.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form.email.label_tag }}
+        {{ form.email }}
+        {% if form.email.errors %}
+        <ul class="errorlist">
+            {% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form.password.label_tag }}
+        {{ form.password }}
+        {% if form.password.errors %}
+        <ul class="errorlist">
+            {% for error in form.password.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form.confirmPassword.label_tag }}
+        {{ form.confirmPassword }}
+        {% if form.confirmPassword.errors %}
+        <ul class="errorlist">
+            {% for error in form.confirmPassword.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        {{ form.role.label_tag }}
+        {{ form.role }}
+        {% if form.role.errors %}
+        <ul class="errorlist">
+            {% for error in form.role.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    <div class="form-group" id="nim_field_group">
+        {{ form.nim.label_tag }}
+        {{ form.nim }}
+        {% if form.nim.errors %}
+        <ul class="errorlist">
+            {% for error in form.nim.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    <div class="form-group" id="nip_field_group">
+        {{ form.nip.label_tag }}
+        {{ form.nip }}
+        {% if form.nip.errors %}
+        <ul class="errorlist">
+            {% for error in form.nip.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">Daftar</button>
+</form>
+<p>Sudah punya akun? <a href="{% url 'authentication:login' %}">Login di sini</a>.</p>
+
+<script>
+    const roleSelect = document.getElementById('{{ form.role.id_for_label }}');
+    const nimGroup = document.getElementById('nim_field_group');
+    const nipGroup = document.getElementById('nip_field_group');
+
+    function toggleFields() {
+        if (roleSelect.value === 'MAHASISWA') {
+            nimGroup.style.display = 'block';
+            nipGroup.style.display = 'none';
+        } else if (roleSelect.value === 'DOSEN') {
+            nimGroup.style.display = 'none';
+            nipGroup.style.display = 'block';
+        } else {
+            nimGroup.style.display = 'none';
+            nipGroup.style.display = 'none';
         }
-        .errorlist { color: red; list-style-type: none; padding-left: 0; }
-        .messages { list-style-type: none; padding: 0; }
-        .messages li.success { background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 10px; border: 1px solid #c3e6cb; border-radius: 4px;}
-        .messages li.error { background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 10px; border: 1px solid #f5c6cb; border-radius: 4px;}
-        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #0056b3; }
-    </style>
-</head>
-<body>
-    <h2>Form Registrasi Akun Baru</h2>
-
-    {% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            {{ form.namaLengkap.label_tag }}
-            {{ form.namaLengkap }}
-            {% if form.namaLengkap.errors %}<ul class="errorlist">{% for error in form.namaLengkap.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-        </div>
-        <div class="form-group">
-            {{ form.email.label_tag }}
-            {{ form.email }}
-            {% if form.email.errors %}<ul class="errorlist">{% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-        </div>
-        <div class="form-group">
-            {{ form.password.label_tag }}
-            {{ form.password }}
-            {% if form.password.errors %}<ul class="errorlist">{% for error in form.password.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-        </div>
-        <div class="form-group">
-            {{ form.confirmPassword.label_tag }}
-            {{ form.confirmPassword }}
-            {% if form.confirmPassword.errors %}<ul class="errorlist">{% for error in form.confirmPassword.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-        </div>
-        <div class="form-group">
-            {{ form.role.label_tag }}
-            {{ form.role }}
-            {% if form.role.errors %}<ul class="errorlist">{% for error in form.role.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-        </div>
-        <div class="form-group" id="nim_field_group">
-            {{ form.nim.label_tag }}
-            {{ form.nim }}
-            {% if form.nim.errors %}<ul class="errorlist">{% for error in form.nim.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-        </div>
-        <div class="form-group" id="nip_field_group">
-            {{ form.nip.label_tag }}
-            {{ form.nip }}
-            {% if form.nip.errors %}<ul class="errorlist">{% for error in form.nip.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
-        </div>
-        <button type="submit">Daftar</button>
-    </form>
-    <p>Sudah punya akun? <a href="{% url 'authentication:login' %}">Login di sini</a>.</p>
-
-    <script>
-        // JavaScript untuk menampilkan/menyembunyikan field NIM/NIP berdasarkan pilihan Role
-        const roleSelect = document.getElementById('{{ form.role.id_for_label }}'); // ID dari select role
-        const nimGroup = document.getElementById('nim_field_group');
-        const nipGroup = document.getElementById('nip_field_group');
-
-        function toggleFields() {
-            if (roleSelect.value === 'MAHASISWA') {
-                nimGroup.style.display = 'block';
-                nipGroup.style.display = 'none';
-            } else if (roleSelect.value === 'DOSEN') {
-                nimGroup.style.display = 'none';
-                nipGroup.style.display = 'block';
-            } else {
-                nimGroup.style.display = 'none';
-                nipGroup.style.display = 'none';
-            }
-        }
-        roleSelect.addEventListener('change', toggleFields);
-        // Panggil saat load untuk setup awal
-        toggleFields();
-    </script>
-</body>
-</html>
+    }
+    roleSelect.addEventListener('change', toggleFields);
+    toggleFields();
+</script>
+{% endblock %}
