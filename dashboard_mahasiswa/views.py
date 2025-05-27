@@ -262,4 +262,4 @@ def dashboard_honor(request):
     except Exception as e:
         context['error_message'] = f'Error: {str(e)}'
     
-    return render(request, 'recruitment/dashboard_honor.html', context)
+    return render(request, 'dashboard_mahasiswa/dashboard_honor.html', context)
