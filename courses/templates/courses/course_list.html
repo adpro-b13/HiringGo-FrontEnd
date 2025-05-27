@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Daftar Mata Kuliah{% endblock %}
+{% block content %}
+<h1>Daftar Mata Kuliah</h1>
+<a href="{% url 'courses:course_create' %}" class="btn btn-success mb-3">Tambah Mata Kuliah</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Kode</th>
+            <th>Nama</th>
+            <th>Deskripsi</th>
+            <th>Dosen Pengampu</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for course in courses %}
+        <tr>
+            <td>{{ course.kode }}</td>
+            <td>{{ course.nama }}</td>
+            <td>{{ course.deskripsi }}</td>
+            <td>
+                {% if course.dosenPengampu %}
+                    {% for dosen in course.dosenPengampu %}
+                        {{ dosen.nama }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}-{% endif %}
+            </td>
+            <td>
+                <a href="{% url 'courses:course_update' course.id %}" class="btn btn-primary btn-sm">Edit</a>
+                <a href="{% url 'courses:course_delete' course.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus?');">Hapus</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">Belum ada data.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

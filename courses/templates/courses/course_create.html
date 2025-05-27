@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Tambah Mata Kuliah{% endblock %}
+{% block content %}
+<h1>Tambah Mata Kuliah</h1>
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="kode" class="form-label">Kode</label>
+        <input type="text" class="form-control" id="kode" name="kode" required>
+    </div>
+    <div class="mb-3">
+        <label for="nama" class="form-label">Nama</label>
+        <input type="text" class="form-control" id="nama" name="nama" required>
+    </div>
+    <div class="mb-3">
+        <label for="deskripsi" class="form-label">Deskripsi</label>
+        <textarea class="form-control" id="deskripsi" name="deskripsi" required></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="lecturers" class="form-label">Nama Dosen Pengampu (pisahkan dengan koma)</label>
+        <input type="text" class="form-control" id="lecturers" name="lecturers" placeholder="Contoh: Dosen A, Dosen B">
+    </div>
+    <button type="submit" class="btn btn-primary">Tambah</button>
+    <a href="{% url 'courses:course_list' %}" class="btn btn-secondary">Kembali</a>
+</form>
+{% endblock %}
