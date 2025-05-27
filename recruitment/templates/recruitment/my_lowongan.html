@@ -12,7 +12,8 @@
       <strong>{{ lowongan.mataKuliah }}</strong> – Semester {{ lowongan.semester }} {{ lowongan.tahunAjaran }}
       <br>
       Dibutuhkan: {{ lowongan.jumlahAsistenDibutuhkan }} |
-      Mendaftar: {{ lowongan.jumlahAsistenMendaftar }}
+      Mendaftar: {{ lowongan.jumlahAsistenMendaftar }} |
+      Diterima: {{ lowongan.jumlahAsistenDiterima }}
       <br>
 
       <a href="{% url 'edit_lowongan' lowongan.id %}">
@@ -20,6 +21,9 @@
       </a>
       <a href="{% url 'lihat_pelamar' lowongan.id %}">
         <button>Lihat Pelamar</button>
+      </a>
+      <a href="{% url 'verify_lowongan_logs' lowongan.id %}">
+        <button>Verifikasi Log Mahasiswa</button>
       </a>
 
 
