@@ -21,7 +21,7 @@ def delete_lowongan(request, id):
         )
         
         if response.status_code == 200:
-            return redirect("my_lowongan")
+            return redirect("recruitment:my_lowongan")
         else:
             return HttpResponse("Gagal menghapus lowongan", status=response.status_code)
     except Exception:
@@ -201,7 +201,7 @@ def edit_lowongan(request, id):
                 }
             )
             if response.status_code == 200:
-                return redirect("my_lowongan")
+                return redirect("recruitment:my_lowongan")
             else:
                 return HttpResponse("Gagal mengedit lowongan", status=response.status_code)
         except Exception:
@@ -237,8 +237,10 @@ def create_lowongan(request):
                     "jumlahAsistenDibutuhkan": int(jumlah)
                 }
             )
-            if response.status_code == 200:
-                return redirect("my_lowongan")
+            print("Status:", response.status_code)
+            print("Body:", response.text)
+            if response.status_code in (200, 201):
+                return redirect("recruitment:my_lowongan")
             else:
                 return HttpResponse("Gagal membuat lowongan", status=response.status_code)
         except Exception:

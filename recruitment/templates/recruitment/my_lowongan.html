@@ -1,6 +1,6 @@
 <h1>Lowongan Saya</h1>
 
-<a href="{% url 'create_lowongan' %}">
+<a href="{% url 'recruitment:create_lowongan' %}">
     <button>Buat Lowongan Baru</button>
 </a>
 
@@ -16,19 +16,19 @@
       Diterima: {{ lowongan.jumlahAsistenDiterima }}
       <br>
 
-      <a href="{% url 'edit_lowongan' lowongan.id %}">
+      <a href="{% url 'recruitment:edit_lowongan' lowongan.id %}">
         <button>Edit</button>
       </a>
-      <a href="{% url 'lihat_pelamar' lowongan.id %}">
+      <a href="{% url 'recruitment:lihat_pelamar' lowongan.id %}">
         <button>Lihat Pelamar</button>
       </a>
-      <a href="{% url 'verify_lowongan_logs' lowongan.id %}">
+      <a href="{% url 'recruitment:verify_lowongan_logs' lowongan.id %}">
         <button>Verifikasi Log Mahasiswa</button>
       </a>
 
 
 
-      <form action="{% url 'delete_lowongan' lowongan.id %}" method="post" style="display:inline;">
+      <form action="{% url 'recruitment:delete_lowongan' lowongan.id %}" method="post" style="display:inline;">
         {% csrf_token %}
         <input type="hidden" name="token" value="{{ token }}">
         <button type="submit" onclick="return confirm('Yakin ingin menghapus lowongan ini?')">Hapus</button>
