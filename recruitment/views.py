@@ -116,7 +116,7 @@ def my_lowongan(request):
 
     try:
         response = httpx.get(
-            f"{BACKEND_URL}/api/lowongan/list",
+            f"{BACKEND_URL}/api/lowongan/my",
             headers={"Authorization": f"Bearer {token}"}
         )
         print("🟢 Status code:", response.status_code)
