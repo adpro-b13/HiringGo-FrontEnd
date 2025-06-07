@@ -46,6 +46,9 @@ INSTALLED_APPS = [
     'dashboard_dosen',
     'user_service',
     'courses',  # <-- add this line
+    'user_service', 
+    'log',
+    'dashboard_mahasiswa',
 ]
 
 MIDDLEWARE = [
@@ -118,7 +121,9 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
+SESSION_COOKIE_AGE = 86400  # 1 hari
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_SECURE = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/

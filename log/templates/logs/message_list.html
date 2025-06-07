@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages for Log #{{ log.id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log-details, .message, .form-group { margin-bottom: 15px; padding: 10px; border: 1px solid #eee; }
+        .log-details { background-color: #f9f9f9; }
+        .message p { margin: 5px 0; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+        .error { color: red; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Messages for Log: {{ log.title }} (ID: {{ log.id }})</h1>
+    <nav>
+        <a href="{% url 'home_page' %}">Home</a> | 
+        <a href="{% url 'logs:log_list' %}">Back to Log List</a>
+    </nav>
+
+    <div class="log-details">
+        <h3>Log Details</h3>
+        <p><strong>Title:</strong> {{ log.title }}</p>
+        <p><strong>Content:</strong> {{ log.content }}</p>
+        <p><strong>Status:</strong> {{ log.status | default:"N/A" }}</p>
+    </div>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <h2>Add New Message</h2>
+    <form method="POST" action="{% url 'logs:message_list_and_add' log_id=log.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="token" value="{{ token }}">
+        <div class="form-group">
+            <label for="message_content">Message:</label>
+            <textarea id="message_content" name="message" rows="3" required></textarea>
+        </div>
+        <button type="submit">Add Message</button>
+    </form>
+
+    <h2>Existing Messages</h2>
+    {% if messages %}
+        {% for msg in messages %}
+        <div class="message">
+            <p><strong>User ID:</strong> {{ msg.userId | default:"Unknown" }} (or author name)</p>
+            <p>{{ msg.content }}</p>
+            <p><small>Posted on: {{ msg.createdAt | date:"Y-m-d H:i" | default:"N/A" }}</small></p>
+        </div>
+        {% endfor %}
+    {% else %}
+    <p>No messages for this log yet.</p>
+    {% endif %}
+</body>
+</html>

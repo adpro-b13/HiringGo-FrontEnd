@@ -1,6 +1,7 @@
-
 from django.urls import path
 from . import views
+
+app_name = 'recruitment'  # Add this line to define the application namespace
 
 urlpatterns = [
     path('', views.lowongan_list, name='lowongan_list'),
@@ -12,8 +13,8 @@ urlpatterns = [
     path('pelamar/<int:id>/', views.lihat_pelamar, name='lihat_pelamar'),
     path('pelamar/<int:pendaftaran_id>/terima/', views.terima_pelamar, name='terima_pelamar'),
     path('pelamar/<int:pendaftaran_id>/tolak/', views.tolak_pelamar, name='tolak_pelamar'),
-    path('status-lamaran/', views.status_lamaran, name='status_lamaran')
-
-
+    path('lamaran-diterima/', views.lamaran_diterima, name='lamaran_diterima'),
+    path('lowongan/<int:lowongan_id>/verify-logs/', views.verify_lowongan_logs, name='verify_lowongan_logs'),
+    path('log/<int:log_id>/process-verification/', views.process_log_verification, name='process_log_verification'),
 ]
 

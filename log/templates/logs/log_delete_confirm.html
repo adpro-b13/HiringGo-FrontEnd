@@ -1,0 +1,36 @@
+{% block title %}Confirm Delete Log{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Confirm Deletion</h2>
+
+    {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    <div class="alert alert-warning" role="alert">
+        <p>Are you sure you want to delete Log ID: <strong>{{ log_id }}</strong>?</p>
+        <p>This action cannot be undone.</p>
+    </div>
+    
+    <form method="POST" action="{% url 'log:log_delete_confirm' vacancy_id=vacancy_id log_id=log_id %}">
+        {% csrf_token %}
+        
+        <input type="hidden" name="vacancyId" value="{{ vacancy_id }}">
+        
+        <input type="hidden" name="token" value="{{ token }}"> 
+        
+        <button type="submit" class="btn btn-danger">Yes, Delete Log</button>
+        
+        {# Link back to the specific log list if vacancy_id is available #}
+        {% if vacancy_id %}
+            <a href="{% url 'log:log_list_view' lowongan_id=vacancy_id %}" class="btn btn-secondary">Cancel</a>
+        {% else %}
+            {# Fallback cancel link if vacancy_id isn't available for some reason #}
+            <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="btn btn-secondary">Cancel</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

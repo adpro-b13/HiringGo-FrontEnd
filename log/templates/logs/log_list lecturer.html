@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .actions a, .actions button { margin-right: 5px; text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; background-color: #f9f9f9; cursor: pointer; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input[type="text"], .form-group textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+        .error { color: red; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Log List</h1>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <h2>Create New Log</h2>
+    <form method="POST" action="{% url 'log:log_list' %}">
+        {% csrf_token %} <!-- Django CSRF token -->
+        <input type="hidden" name="token" value="{{ token }}"> <!-- If your view expects token in POST for creation -->
+        <div class="form-group">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+        <div class="form-group">
+            <label for="content">Content:</label>
+            <textarea id="content" name="content" rows="4" required></textarea>
+        </div>
+        <!-- Add other fields as per your log_data in views.py for POST -->
+        <button type="submit">Create Log</button>
+    </form>
+
+    <h2>Existing Logs</h2>
+    {% if logs %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Content Snippet</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.id }}</td>
+                <td>{{ log.title }}</td>
+                <td>{{ log.content|slice:":100" }}{% if log.content|length > 100 %}...{% endif %}</td>
+                <td>{{ log.status | default:"N/A" }}</td>
+                <td class="actions">
+                    <a href="{% url 'log:message_list_and_add' log_id=log.id %}">Messages</a>
+                    <!-- Form for Verify Action -->
+                    <form method="POST" action="{% url 'log:log_verify_action' log_id=log.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="token" value="{{ token }}">
+                        <select name="action">
+                            <option value="ACCEPT">Accept</option>
+                            <option value="REJECT">Reject</option>
+                        </select>
+                        <button type="submit">Verify</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No logs found.</p>
+    {% endif %}
+</body>
+</html>
