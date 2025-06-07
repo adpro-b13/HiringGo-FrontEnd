@@ -228,38 +228,76 @@ def my_logs(request):
     return render(request, 'log/log_list.html', context)
 
 def dashboard_honor(request):
-
     token = request.session.get("auth_token")
     user_role = request.session.get("user_role")
     user_id = request.session.get("user_id")
-
-    # if not token or user_role != "MAHASISWA":
-    #     return redirect("authentication:login")
 
     headers = {
         'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json'
     }
     
+    year = request.GET.get('year')
+    month = request.GET.get('month')
+    
+    params = {}
+    if year:
+        params['year'] = year
+    if month:
+        params['month'] = month
+    
     context = {
-        'honor_details': None,
+        'total_jam_log': 0,
+        'total_uang_insentif': 0,
+        'rincian_honor': [],
         'error_message': None
     }
     
     try:
         with httpx.Client() as client:
-            response = client.get(
-                f"{BACKEND_URL_RECRUITMENT}/dashboard/honor/details",
+            summary_response = client.get(
+                f"{BACKEND_URL_LOG}/dashboard/honor",
                 headers=headers,
+                params=params,
                 timeout=10
             )
             
-            if response.status_code == 200:
-                context['honor_details'] = response.json()
-            else:
-                context['error_message'] = f'Gagal mengambil data honor (Status: {response.status_code})'
+            if summary_response.status_code == 200:
+                summary_data = summary_response.json()
                 
+                context['total_jam_log'] = summary_data.get('totalHours', 0)
+                context['total_uang_insentif'] = summary_data.get('totalHonor', 0)
+                
+                details = summary_data.get('details', [])
+                formatted_details = []
+                
+                for detail in details:
+                    formatted_detail = {
+                        'vacancyId': detail.get('vacancyId', ''),
+                        'vacancyTitle': detail.get('vacancyTitle', 'Unknown'),
+                        'year': detail.get('year', ''),
+                        'month': detail.get('month', ''), 
+                        'totalHours': detail.get('totalHours', 0),
+                        'totalHonor': detail.get('totalHonor', 0)
+                    }
+                    formatted_details.append(formatted_detail)
+                
+                context['rincian_honor'] = formatted_details
+                
+            elif summary_response.status_code == 400:
+                context['error_message'] = 'Parameter tahun atau bulan tidak valid'
+            elif summary_response.status_code == 401:
+                context['error_message'] = 'Sesi Anda telah berakhir, silakan login kembali'
+            elif summary_response.status_code == 403:
+                context['error_message'] = 'Anda tidak memiliki akses ke data ini'
+            else:
+                context['error_message'] = f'Gagal mengambil data honor (Status: {summary_response.status_code})'
+                
+    except httpx.TimeoutException:
+        context['error_message'] = 'Timeout: Server tidak merespons dalam waktu yang ditentukan'
+    except httpx.RequestError as e:
+        context['error_message'] = f'Error koneksi: {str(e)}'
     except Exception as e:
-        context['error_message'] = f'Error: {str(e)}'
+        context['error_message'] = f'Error tidak terduga: {str(e)}'
     
     return render(request, 'dashboard_honor.html', context)
