@@ -23,6 +23,7 @@ urlpatterns = [
     path('lowongan/', include('recruitment.urls')),
     path('dashboard/dosen/', include('dashboard_dosen.urls')),
     path('users/', include('user_service.urls')), 
+    path('courses/', include('courses.urls', namespace='courses')),
     path('log/', include('log.urls')),
     path('', include('dashboard_mahasiswa.urls')),
 ]

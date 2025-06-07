@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'authentication',
     'recruitment',
     'dashboard_dosen',
+    'user_service',
+    'courses',  # <-- add this line
     'user_service', 
     'log',
     'dashboard_mahasiswa',
